@@ -2,7 +2,7 @@
 
 > **인하공업전문대학 컴퓨터정보공학과 빅데이터 프로젝트** > **과목**: 빅데이터 프로젝트 (3학년 B반)  
 > **학번/이름**: 202144051 김선재  
-> [cite_start]**프로젝트 기간**: 2024.09 ~ 2024.12 [cite: 1-4]
+> **프로젝트 기간**: 2025.09 ~ 2025.12 
 
 ---
 
@@ -29,17 +29,17 @@
     * 지역: 서울, 인천, 경기도
 * **프로세스**: 데이터 수집 → 정제 및 가공 → 분석(NLP) → 시각화
 
-![원티드 웹사이트 공고 화면](images/사진1.png)
+![원티드 웹사이트 공고 화면](images/website.png)
 
 ---
 
 ## 2. 개발 환경 (Environment)
 
-Google Colab 환경에서 진행하였으며, 크롤링 및 텍스트 분석을 위해 `Selenium`, `GLiNER`, `KoNLPy` 등의 라이브러리를 사용했습니다.
+Google Colab 환경에서 진행하였으며, 크롤링 및 텍스트 분석을 위해 `Selenium`, `GLiNER`, `KoNLPy` 등의 라이브러리를 사용.
 
 ### 2.1 라이브러리 및 Chrome 설치
-Colab의 기본 Chrome은 보안 문제로 실행되지 않아, Google에서 배포하는 Stable 버전을 직접 설치하여 사용했습니다.
-한글 폰트를 기본 지원하지 않기 때문에, 따로 설치하였습니다.
+Colab의 기본 Chrome은 보안 문제로 실행되지 않아, Google에서 배포하는 Stable 버전을 직접 설치하여 사용.
+한글 폰트를 기본 지원하지 않기 때문에, 따로 설치.
 
 ```bash
 # 일반 크롬 브라우저는 보안 문제로 오류. 구글에서 직접 내려 받음
@@ -502,10 +502,10 @@ visualize_top_skills(hard_keywords, "직무 역량", text, color_palette='Blues_
 
 ### 5.4 분석 결과
 * **기술 스택**: **Python**이 가장 많았으며, AI 트렌드에 따라 **PyTorch, TensorFlow**가 상위권에 위치. 웹 개발에서는 **React, Java, Node.js**가, 인프라에서는 **AWS, Docker, Git**이 필수적.
-* **태도(Soft Skills)**: '협업', '커뮤니케이션', '소통'이 가장 중요하게 나타났으며, '주도적', '적극적' 성향을 선호하는 것으로 분석
-
 ![기술 스택 막대 그래프](images/tech_stack_bar.png)
 ![기술 스택 워드 클라우드](images/tech_stack_wordcloud.png)
+
+* **태도(Soft Skills)**: '협업', '커뮤니케이션', '소통'이 가장 중요하게 나타났으며, '주도적', '적극적' 성향을 선호하는 것으로 분석
 ![태도 및 자세 막대 그래프](images/soft_skill_bar.png)
 ![태도 및 자세 워드 클라우드](images/soft_skill_wordcloud.png)
 

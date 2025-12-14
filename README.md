@@ -19,7 +19,7 @@
 ## 1. 서론 (Introduction)
 
 ### 1.1 주제 선정 이유
-대학 졸업 시기가 다가오면서 취업에 대한 고민이 깊어졌습니다. 막연히 스펙을 쌓기보다, 실제 기업의 채용 공고를 분석하여 **현재의 기술 트렌드**와 **기업이 요구하는 인재상**을 데이터 기반으로 명확히 파악하고자 이 주제를 선정했습니다.
+대학 졸업 시기가 다가오면서 취업에 대한 고민이 깊어졌다. 막연히 스펙을 쌓기보다, 실제 기업의 채용 공고를 분석하여 **현재의 기술 트렌드**와 **기업이 요구하는 인재상**을 데이터 기반으로 명확히 파악하고자 이 주제를 선정했다.
 
 ### 1.2 프로젝트 설정
 * **분석 대상**: 채용 정보 사이트 **'원티드(Wanted)'** (텍스트 위주 구성으로 크롤링 용이)
@@ -39,23 +39,22 @@ Google Colab 환경에서 진행하였으며, 크롤링 및 텍스트 분석을 
 
 ### 2.1 라이브러리 및 Chrome 설치
 Colab의 기본 Chrome은 보안 문제로 실행되지 않아, Google에서 배포하는 Stable 버전을 직접 설치하여 사용했습니다.
+한글 폰트를 기본 지원하지 않기 때문에, 따로 설치하였습니다.
 
 ```bash
-# 일반 크롬 브라우저는 보안 문제로 오류 발생. 구글에서 직접 내려 받음
+# 일반 크롬 브라우저는 보안 문제로 오류. 구글에서 직접 내려 받음
 %%shell
 sudo apt-get update
 sudo apt-get install -y wget unzip
 
-wget [https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb](https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb)
+wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 sudo dpkg -i google-chrome-stable_current_amd64.deb
 sudo apt-get -f install -y  # 의존성 오류 발생시 자동 수정
 
 google-chrome --version
 
-# 한글 폰트 설치
 !apt-get -qq -y install fonts-nanum > /dev/null
 
-# 필요 라이브러리 설치
 !pip install selenium
 !pip install selenium webdriver_manager
 !pip install gliner
@@ -84,12 +83,11 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 
-# 폰트 설정 (나눔고딕)
 fe = fm.FontEntry(
-    fname=r'/usr/share/fonts/truetype/nanum/NanumBarunGothic.ttf',
-    name='NanumGothic')
-fm.fontManager.ttflist.insert(0, fe)
-plt.rcParams.update({'font.size': 18, 'font.family': 'NanumGothic'})
+    fname=r'/usr/share/fonts/truetype/nanum/NanumBarunGothic.ttf', # ttf 파일이 저장되어 있는 경로
+    name='NanumGothic')                        # 이 폰트의 원하는 이름 설정
+fm.fontManager.ttflist.insert(0, fe)              # Matplotlib에 폰트 추가
+plt.rcParams.update({'font.size': 18, 'font.family': 'NanumGothic'}) # 폰트 설정
 ```
 
 ---
@@ -97,21 +95,22 @@ plt.rcParams.update({'font.size': 18, 'font.family': 'NanumGothic'})
 ## 3. 데이터 수집 (Data Collection)
 
 ### 3.1 봇 탐지 우회 설정 (Stealth Mode)
-Selenium을 이용한 자동화 탐지를 피하기 위해 다음과 같은 설정을 적용했습니다.
+Selenium을 이용하였을 때 서버의 자동화 탐지를 피하기 위해 다음과 같은 설정을 적용
 1.  **Headless 모드**: GUI 없이 백그라운드 실행 (리소스 절약)
 2.  **User-Agent 변경**: 봇이 아닌 일반 윈도우 10 사용자처럼 위장
 3.  **Automation Flag 제거**: 자동화 도구 사용 흔적 제거
 4.  **WebDriver 속성 조작**: `navigator.webdriver` 값을 `undefined`로 강제 설정하여 봇 탐지 스크립트 무력화
 
+이외에도 공유 메모리 충돌 방지, 원활한 데이터 수집을 위해 윈도우 사이즈 고정, 리눅스 보안과 충돌 방지 등을 적용
 ```python
-# 옵션 설정
+# 봇 탐지 우회 및 크롬 GUI 없이 백그라운드 실행 설정
 options = Options()
 options.add_argument("--headless=new")
 options.add_argument("--no-sandbox")
 options.add_argument("--disable-dev-shm-usage")
 options.add_argument("--window-size=1920,1080")
 
-# User-Agent 위장
+# User-Agent 변경으로 봇 탐지 우회 설정
 user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 options.add_argument(f'user-agent={user_agent}')
 
@@ -124,7 +123,7 @@ options.add_argument('--disable-blink-features=AutomationControlled')
 service = Service(ChromeDriverManager().install())
 driver = webdriver.Chrome(service=service, options=options)
 
-# 봇 탐지 방지용 스크립트 실행 (navigator.webdriver = undefined)
+# 봇 탐지 방지용 스크립트 실행
 driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
     "source": """
     Object.defineProperty(navigator, 'webdriver', {
@@ -135,12 +134,14 @@ driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
 ```
 
 ### 3.2 링크 수집 및 상세 내용 크롤링
-타겟 URL에 접속하여 스크롤을 내리며 공고 링크를 수집하고, `set`을 이용해 중복을 제거했습니다. 이후 각 페이지에서 **제목, 회사명, 주요업무, 자격요건, 우대사항**을 추출했습니다.
+타겟 URL에 접속하여 스크롤을 내리며 공고 링크를 수집하고, 리스트를 집합으로 변환해 중복을 제거, 이후 각 링크 상세 페이지에 접근해 본문의 **제목, 회사명, 주요업무, 자격요건, 우대사항**을 추출
 
 ```python
 # 링크 수집
+# 타겟 URL (개발 직군 전체 / 인천, 서울, 경기지역 한정 / 경력 신입 ~ 1년 / 정규 및 계약직)
+
 print(" 채용공고 링크 수집 시작 ")
-target_url = "[https://www.wanted.co.kr/wdlist/518?country=kr&job_sort=job.latest_order&years=0&years=1&employment_types=job.employment_type.regular&employment_types=job.employment_type.contract&locations=seoul.all&locations=incheon.all&locations=gyeonggi.all](https://www.wanted.co.kr/wdlist/518?country=kr&job_sort=job.latest_order&years=0&years=1&employment_types=job.employment_type.regular&employment_types=job.employment_type.contract&locations=seoul.all&locations=incheon.all&locations=gyeonggi.all)"
+target_url = "https://www.wanted.co.kr/wdlist/518?country=kr&job_sort=job.latest_order&years=0&years=1&employment_types=job.employment_type.regular&employment_types=job.employment_type.contract&locations=seoul.all&locations=incheon.all&locations=gyeonggi.all"
 driver.get(target_url)
 time.sleep(3)
 
@@ -149,40 +150,52 @@ for i in range(30):
     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
     time.sleep(2)
 
-# 링크 추출 및 중복 제거
+# 링크 추출
 all_links = driver.find_elements(By.TAG_NAME, "a")
 job_links = []
 for a in all_links:
     href = a.get_attribute("href")
     if href and "/wd/" in href:
         job_links.append(href)
+
+# 중복 제거
 job_links = list(set(job_links))
 print(f" 총 {len(job_links)}개의 공고 링크를 확보 ")
 
-# 상세 페이지 크롤링
+
+# 상세 내용 크롤링
+print(" 상세 페이지 내용 크롤링 중 ")
+
 final_data = []
 
 for link in tqdm(job_links):
     try:
         driver.get(link)
-        time.sleep(2)
+        time.sleep(2) # 페이지 로딩 대기
+
         soup = BeautifulSoup(driver.page_source, 'html.parser')
 
-        # 제목 추출
-        try: title = soup.find("h1").text
-        except: title = ""
-
-        # 회사명 추출 (링크 기반)
+        # 제목 & 회사명
         try:
+            title = soup.find("h1").text
+        except:
+            title = ""
+
+        try:
+            # 회사명은 h1 바로 위 a태그 혹은 class가 들어간 태그
+            # 원티드 웹사이트 구조상 '회사정보' 링크 등을 통해 유추
             company_link = soup.select_one("a[href^='/company/']")
             company = company_link.text if company_link else ""
-        except: company = ""
+        except:
+            company = ""
 
-        # 본문 내용 추출 함수
+        # 본문 내용 추출 - 헤더 텍스트 기준
         def get_text_by_header(target_text):
+            # h3, h2, strong 태그 중 target_text를 포함하는 것 찾기
             headers = soup.find_all(['h3', 'h2', 'strong'], string=lambda x: x and target_text in x)
             result_text = ""
             for h in headers:
+                # 헤더 바로 다음 요소들(p, ul 등)의 텍스트 가져오기
                 next_elem = h.find_next_sibling()
                 if next_elem:
                     result_text += next_elem.get_text(separator=" ", strip=True)
@@ -194,10 +207,16 @@ for link in tqdm(job_links):
 
         if title:
             final_data.append({
-                'company': company, 'title': title, 'main_work': main_work,
-                'qualification': qualification, 'preference': preference, 'link': link
+                'company': company,
+                'title': title,
+                'main_work': main_work,
+                'qualification': qualification,
+                'preference': preference,
+                'link': link
             })
-    except Exception as e: continue
+
+    except Exception as e:
+        continue
 
 df = pd.DataFrame(final_data)
 df.to_csv("wanted_job_data.csv", encoding="utf-8-sig", index=False)
@@ -207,121 +226,295 @@ df.to_csv("wanted_job_data.csv", encoding="utf-8-sig", index=False)
 
 ## 4. 데이터 전처리 및 분석 (Data Processing)
 
-수집된 텍스트 데이터를 **기술 스택(Tech Stack)**과 **역량(Soft/Hard Skills)**으로 분류하여 분석했습니다.
+수집된 텍스트 데이터를 **기술 스택(Tech Stack)**과 **역량(Soft/Hard Skills)**으로 분류하여 분석
+
+### 4.0 기술 스택, 소프트 / 하드 스킬 분류 함수
+```python
+# 기술 스택 추출
+def extract_tech_stack(text, model):
+    if not isinstance(text, str) or len(text) < 5:
+        return ""
+
+    # 기술 스택 라벨
+    tech_labels = [
+        "Programming Language",
+        "Framework & Library",
+        "Database & Tool",
+        "Cloud & DevOps",
+        "AI & Data Stack"
+    ]
+
+    entities = model.predict_entities(text, tech_labels, threshold=0.3)
+
+    found_techs = []
+    for entity in entities:
+        # 추출된 텍스트 저장
+        found_techs.append(entity["text"])
+
+    # 중복 제거 후 콤마로 연결
+    return ', '.join(sorted(list(set(found_techs))))
+
+
+# 소프트/하드 스킬 문장 추출
+def extract_soft_hard_skill(text):
+    if not isinstance(text, str):
+        return "", ""
+
+    # 문장 분리 (줄바꿈, 마침표, 불렛 포인트 기준)
+    sentences = re.split(r'[.\n•·-]', text)
+    sentences = [x.strip() for x in sentences if len(x.strip()) > 5]
+
+    soft_skills = []
+    hard_skills = []
+
+    # 하드스킬(직무 역량)
+    tech_keyword = [
+        '설계', '구축', '운영', '개발', '경험', '최적화', '이해', '지식',
+        '알고리즘', '구조', '아키텍처', '튜닝', '배포', '파이프라인', '테스트',
+        'AWS', 'Cloud', 'API', 'DB', 'CI/CD', '트래픽', '대용량', '모델링'
+    ]
+
+    # 소프트 스킬 (태도 및 자세)
+    soft_keyword = [
+        '커뮤니케이션', '소통', '협업', '원활', '공유', '해결',
+        '성장', '열정', '주도', '논리', '책임', '일정', '능동', '피드백',
+        '비즈니스', '설득', '팀워크', '유연'
+    ]
+
+    for sent in sentences:
+        # 1. 문장 끝맺음 패턴 (~분, ~능력, ~경험 등)
+        if not re.search(r'(분|함|력|험|해|식|가능|필수|우대|중시)$', sent):
+            continue
+
+        # 2. 키워드 포함 여부 확인
+        # 띄어쓰기 무시하고 검사하기 위해 변환
+        is_hard = any(t in sent for t in tech_keyword)
+        is_soft = any(t in sent for t in soft_keyword)
+
+        # 3. 분류 로직 (소프트 키워드가 있으면 우선 소프트로 분류)
+        if is_soft:
+            soft_skills.append(sent)
+        elif is_hard:
+            hard_skills.append(sent)
+
+    return " | ".join(soft_skills), " | ".join(hard_skills)
+```
 
 ### 4.1 기술 스택 추출 (with GLiNER)
-트렌드가 빠르게 변하는 기술 스택은 사전 학습된 AI 모델인 **GLiNER**를 사용하여 문맥 내에서 엔티티를 추출했습니다.
+트렌드가 빠르게 변하는 기술 스택은 사전 학습된 AI 모델인 **GLiNER**를 사용하여 문맥 내에서 단어를 추출
 
 ```python
+# df = pd.read_csv("wanted_job_data.csv") # 런타임 종료로 데이터 증발시 사용
+
 # 모델 로드
 model = GLiNER.from_pretrained("urchade/gliner_medium-v2.1")
 
 # 텍스트 통합
 df['full_text'] = (df['main_work'].fillna('') + ' ' + df['qualification'].fillna('') + ' ' + df['preference'].fillna(''))
 
-# 기술 스택 추출 함수
-def extract_tech_stack(text, model):
-    if not isinstance(text, str) or len(text) < 5: return ""
-    
-    tech_labels = ["Programming Language", "Framework & Library", "Database & Tool", "Cloud & DevOps", "AI & Data Stack"]
-    entities = model.predict_entities(text, tech_labels, threshold=0.3)
-    
-    found_techs = [entity["text"] for entity in entities]
-    return ', '.join(sorted(list(set(found_techs))))
-
 # 적용
-df['Tech_Stack'] = df['full_text'].progress_apply(extract_tech_stack, args=(model,))
+df['Tech_Stack'] = df['full_text'].progress_apply(extract_tech_stack, model)
+
+all_techs = []
+
+# df['Tech_Stack']이 NaN인 경우를 빈 문자열로 변경
+for stack in df['Tech_Stack'].fillna(""):
+    # 데이터가 문자열이 아니거나, 공백만 있는 경우 패스
+    if not isinstance(stack, str) or not stack.strip():
+        continue
+
+    # 콤마로 분리하되, 각 아이템이 의미 있는 문자열인 경우만 저장(a, , b,... 이나 ' ' 같은 요소들)
+    techs = [t.strip() for t in stack.split(',') if t.strip()]
+    all_techs.extend(techs)
+
+# 빈도 분석
+count_data = Counter(all_techs)
+tech_df = pd.DataFrame(count_data.most_common(), columns=['Tech', 'Frequency'])
 ```
 
 ### 4.2 소프트/하드 스킬 분류 (Rule-based)
-역량 키워드는 정형화되어 있으므로, 키워드 사전과 정규표현식(문장 끝맺음 패턴)을 활용하여 추출했습니다.
+역량 키워드는 정형화되어 있으므로, 키워드 사전과 정규표현식(문장 끝맺음 패턴)을 활용하여 추출
 
 ```python
 # 소프트/하드 스킬 분류 함수
-def extract_soft_hard_skill(text):
-    if not isinstance(text, str): return "", ""
-    
-    sentences = re.split(r'[.\n•·-]', text)
-    sentences = [x.strip() for x in sentences if len(x.strip()) > 5]
-    
-    soft_skills, hard_skills = [], []
-    
-    # 키워드 사전 (일부 생략)
-    tech_keyword = ['설계', '구축', '운영', 'AWS', 'API', 'DB', '트래픽' ...]
-    soft_keyword = ['커뮤니케이션', '소통', '협업', '주도', '책임', '성장' ...]
-    
-    for sent in sentences:
-        # 문장 끝맺음 확인 (~분, ~능력 등)
-        if not re.search(r'(분|함|력|험|해|식|가능|필수|우대|중시)$', sent): continue
-        
-        is_hard = any(t in sent for t in tech_keyword)
-        is_soft = any(t in sent for t in soft_keyword)
-        
-        if is_soft: soft_skills.append(sent)
-        elif is_hard: hard_skills.append(sent)
-            
-    return " | ".join(soft_skills), " | ".join(hard_skills)
+okt = Okt()
+tqdm.pandas()
 
+# 추출 결과가 튜플 형식 -> 리스트로 재가공
+print("소프트 / 하드 스킬 추출")
 df[['Soft_Skills', 'Hard_Skills']] = df['full_text'].progress_apply(lambda x: pd.Series(extract_soft_hard_skill(x)))
+
 ```
 
+### 4.3 데이터 백업
+```python
+output_filename = "wanted_job_data_result.csv"
+df.to_csv(output_filename, encoding="utf-8-sig", index=False)
+print(f"파일 저장 완료: {output_filename}")
+```
+
+### 4.4 소프트, 하드 스킬 전처리
+```python
+# 텍스트 정제 및 명사 추출
+def extract_keywords_from_sentences(column_data, stop_words):
+    all_keywords = []
+
+    for text in column_data.fillna(""):
+        # 빈 값 체크
+        if not isinstance(text, str) or not text.strip():
+            continue
+
+        # 파이프(|)로 연결된 문장들 분리
+        sentences = text.split('|')
+
+        for sent in sentences:
+            if not sent.strip(): continue
+
+            # 명사 추출
+            nouns = okt.nouns(sent)
+
+            # 불용어 제거 및 2글자 이상 단어만 선택 -> 한글자 단어 일, 급, 팀 등은 의미가 없음
+            clean_nouns = [
+                n for n in nouns
+                if n not in stop_words and len(n) >= 2
+            ]
+            all_keywords.extend(clean_nouns)
+    return all_keywords
+
+```
 ---
 
 ## 5. 데이터 시각화 (Visualization)
 
-추출된 데이터의 빈도수를 분석하고 **막대 그래프**와 **워드 클라우드**로 시각화했습니다. 정확한 분석을 위해 `KoNLPy`를 이용한 명사 추출과 불용어 처리를 수행했습니다. 
+추출된 데이터의 빈도수를 분석하고 **막대 그래프**와 **워드 클라우드**로 시각화 정확한 분석을 위해 `KoNLPy`를 이용한 명사 추출과 불용어 처리를 수행 
 
-### 5.1 시각화 코드
+### 5.1 기술 스택 시각화 코드
 ```python
-# 텍스트 정제 및 명사 추출 함수
-def extract_keywords_from_sentences(column_data, stop_words):
-    all_keywords = []
-    for text in column_data.fillna(""):
-        sentences = text.split('|')
-        for sent in sentences:
-            if not sent.strip(): continue
-            nouns = okt.nouns(sent)
-            # 불용어 제거 및 2글자 이상 단어만 선택
-            clean_nouns = [n for n in nouns if n not in stop_words and len(n) >= 2]
-            all_keywords.extend(clean_nouns)
-    return all_keywords
+# 막대 그래프 시각화
+plt.figure(figsize=(12, 8))
+top_20 = tech_df.head(20).sort_values(by='Frequency', ascending=False)
 
-# 시각화 함수 (Bar Plot & Word Cloud)
+sns.barplot(x='Frequency', y='Tech', data=top_20, palette='viridis')
+plt.title('기술 스택 TOP 20')
+plt.grid(axis='x', linestyle='--', alpha=0.6)
+
+filename_bar = "tech_stack_bar.png"
+plt.savefig(filename_bar, dpi=300, bbox_inches='tight')
+print(f"저장 완료: {filename_bar}")
+plt.show()
+
+# 워드 클라우드 시각화
+if count_data: # 데이터가 있을 때만 실행
+    wc = WordCloud(
+        width=1000,
+        height=500,
+        background_color='white',
+        colormap='Dark2',
+        font_path='/usr/share/fonts/truetype/nanum/NanumBarunGothic.ttf'
+    )
+    wc.generate_from_frequencies(count_data)
+
+    plt.figure(figsize=(12, 6))
+    plt.imshow(wc, interpolation='bilinear')
+    plt.axis('off')
+    plt.title('기술 스택 워드 클라우드', fontsize=15)
+    filename_wc = "tech_stack_wordcloud.png"
+    plt.savefig(filename_wc, dpi=300, bbox_inches='tight')
+    print(f"저장 완료: {filename_wc}")
+    plt.show()
+else:
+    print("시각화할 데이터가 없습니다.")
+```
+
+### 5.2 태도 / 직무 역량 시각화 코드
+```python
+# 시각화 함수
 def visualize_top_skills(keywords, title, text, color_palette='viridis'):
-    if not keywords: return
-    
+    if not keywords:
+        print(f"[{title}] 시각화할 데이터가 없습니다.")
+        return
+
+    # 빈도 계산
     count_data = Counter(keywords)
     df_freq = pd.DataFrame(count_data.most_common(20), columns=['Keyword', 'Frequency'])
-    
+
     # 막대 그래프
     plt.figure(figsize=(12, 6))
     sns.barplot(x='Frequency', y='Keyword', data=df_freq, palette=color_palette)
-    plt.title(f'{title} 빈도 TOP 20')
-    plt.savefig(f"{text}_bargraph.png", dpi=300)
+    plt.title(f'{title} 빈도 TOP 20', fontsize=16)
+    plt.xlabel('빈도수')
+    plt.grid(axis='x', linestyle='--', alpha=0.5)
+    filename_wc = text+"_bargraph.png"
+    plt.savefig(filename_wc, dpi=300, bbox_inches='tight')
+    print(f"저장 완료: {filename_wc}")
     plt.show()
-    
+
     # 워드 클라우드
-    wc = WordCloud(width=800, height=400, background_color='white',
-                   font_path='/usr/share/fonts/truetype/nanum/NanumBarunGothic.ttf',
-                   colormap='coolwarm' if 'Hard' in title else 'summer')
+    wc = WordCloud(
+        width=800, height=400,
+        background_color='white',
+        font_path='/usr/share/fonts/truetype/nanum/NanumBarunGothic.ttf',
+        colormap='coolwarm' if 'Hard' in title else 'summer'
+    )
     wc.generate_from_frequencies(count_data)
-    
+
     plt.figure(figsize=(10, 5))
     plt.imshow(wc, interpolation='bilinear')
     plt.axis('off')
-    plt.savefig(f"{text}_wordcloud.png", dpi=300)
+    plt.title(f'{title} 워드 클라우드', fontsize=14)
+    filename_wc = text+"_wordcloud.png"
+    plt.savefig(filename_wc, dpi=300, bbox_inches='tight')
+    print(f"저장 완료: {filename_wc}")
     plt.show()
 ```
 
-### 5.2 분석 결과
-* **기술 스택**: **Python**이 가장 많았으며, AI 트렌드에 따라 **PyTorch, TensorFlow**가 상위권에 위치했습니다. [cite_start]웹 개발에서는 **React, Java, Node.js**가, 인프라에서는 **AWS, Docker, Git**이 필수적이었습니다.
-* **태도(Soft Skills)**: '협업', '커뮤니케이션', '소통'이 가장 중요하게 나타났으며, '주도적', '적극적' 성향을 선호하는 것으로 분석되었습니다.
+### 5.3 불용어 설정 및 전처리, 시각화 함수 트리거
+```python
+okt = Okt()
 
+# 불용어 리스트 정의
+# 채용공고에 무조건 나오지만 분석에는 쓸모없는 단어들
+# '개발','설계'는 너무 뻔해서 제외
+stop_words_soft = set([
+    '경험', '분', '능력', '우대', '필수', '자격', '업무', '등', '및', '대한',
+    '활용', '이해', '관련', '보유', '기반', '통한', '위해', '가능', '지식',
+    '사용', '구축', '운영', '개발', '설계', '문제',
+    '우리', '모집', '채용', '생각', '사람', '해결', '과정', '참여', '이상',
+])
+
+stop_words_hard = set([
+    '경험', '분', '능력', '우대', '필수', '자격', '업무', '등', '및', '대한',
+    '활용', '이해', '관련', '보유', '기반', '통한', '위해', '가능', '지식',
+    '사용', '구축', '운영', '개발', '설계', '문제',
+    '우리', '모집', '채용', '생각', '사람', '해결', '과정', '참여', '이상',
+])
+
+print("요구하는 태도 및 자세 분석")
+text = 'soft_skill'
+soft_keywords = extract_keywords_from_sentences(df['Soft_Skills'], stop_words_soft)
+visualize_top_skills(soft_keywords, "태도 및 자세", text, color_palette='Blues_r')
+
+print("직무 역량 분석")
+text = 'hard_skill'
+hard_keywords = extract_keywords_from_sentences(df['Hard_Skills'], stop_words_hard)
+visualize_top_skills(hard_keywords, "직무 역량", text, color_palette='Blues_r')
+```
+
+### 5.4 분석 결과
+* **기술 스택**: **Python**이 가장 많았으며, AI 트렌드에 따라 **PyTorch, TensorFlow**가 상위권에 위치. 웹 개발에서는 **React, Java, Node.js**가, 인프라에서는 **AWS, Docker, Git**이 필수적.
+* **태도(Soft Skills)**: '협업', '커뮤니케이션', '소통'이 가장 중요하게 나타났으며, '주도적', '적극적' 성향을 선호하는 것으로 분석
+
+![기술 스택 막대 그래프](images/tech_stack_bar.png)
 ![기술 스택 워드 클라우드](images/tech_stack_wordcloud.png)
+![태도 및 자세 막대 그래프](images/soft_skill_bar.png)
 ![태도 및 자세 워드 클라우드](images/soft_skill_wordcloud.png)
+
+* **직무 역량(hard Skillsl**: 직무 역량은 아쉽게 분석에 실패. 직무별로 요구하는 역량이 너무 다양하고, 전문 용어가 많이 포함되어 있기 때문에 konlpy를 이용한 형태소 분석이 잘못 이루어진 것으로 추정.
+![직무역량 막대 그래프직무역량 막대 그래프](images/hard_ski
+![직무역량 워드 클라우드](images/hard_skill_wordcloud.png)
 
 ---
 
 ## 6. 결론 (Conclusion)
 
-본 프로젝트를 통해 IT 채용 시장에서 **Python과 AI 기술의 중요성**을 데이터로 확인했습니다. 취업을 위해서는 단순히 코딩 실력뿐만 아니라 **AWS/Docker/Git을 활용한 개발 환경 구축 능력**, 그리고 팀원과 원활하게 **소통하고 협업하는 태도**를 갖추는 것이 핵심임을 알 수 있었습니다.
+본 프로젝트를 통해 IT 채용 시장에서 **Python과 AI 기술의 트렌드화**를 데이터로 확인. 취업을 위해서는 단순히 코딩 실력뿐만 아니라 **AWS/Docker/Git을 활용한 개발 환경 구축 능력**, 그리고 팀원과 원활하게 소통하고 협업하는 태도**음를 갖추는 것이 핵심임을 알 수 있었음.

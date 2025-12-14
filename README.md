@@ -19,7 +19,7 @@
 ## 1. 서론 (Introduction)
 
 ### 1.1 주제 선정 이유
-대학 졸업 시기가 다가오면서 취업에 대한 고민이 깊어졌습니다. [cite_start]막연히 스펙을 쌓기보다, 실제 기업의 채용 공고를 분석하여 **현재의 기술 트렌드**와 **기업이 요구하는 인재상**을 데이터 기반으로 명확히 파악하고자 이 주제를 선정했습니다. [cite: 61-62]
+대학 졸업 시기가 다가오면서 취업에 대한 고민이 깊어졌습니다. 막연히 스펙을 쌓기보다, 실제 기업의 채용 공고를 분석하여 **현재의 기술 트렌드**와 **기업이 요구하는 인재상**을 데이터 기반으로 명확히 파악하고자 이 주제를 선정했습니다.
 
 ### 1.2 프로젝트 설정
 * **분석 대상**: 채용 정보 사이트 **'원티드(Wanted)'** (텍스트 위주 구성으로 크롤링 용이)
@@ -27,7 +27,7 @@
     * 직군: 개발 직군 전체
     * 경력: 신입 및 경력 1년 미만
     * 지역: 서울, 인천, 경기도
-* [cite_start]**프로세스**: 데이터 수집 → 정제 및 가공 → 분석(NLP) → 시각화 [cite: 65-75]
+* **프로세스**: 데이터 수집 → 정제 및 가공 → 분석(NLP) → 시각화
 
 ![원티드 웹사이트 공고 화면](images/사진1.png)
 
@@ -35,10 +35,10 @@
 
 ## 2. 개발 환경 (Environment)
 
-[cite_start]Google Colab 환경에서 진행하였으며, 크롤링 및 텍스트 분석을 위해 `Selenium`, `GLiNER`, `KoNLPy` 등의 라이브러리를 사용했습니다. [cite: 79-81]
+Google Colab 환경에서 진행하였으며, 크롤링 및 텍스트 분석을 위해 `Selenium`, `GLiNER`, `KoNLPy` 등의 라이브러리를 사용했습니다.
 
 ### 2.1 라이브러리 및 Chrome 설치
-[cite_start]Colab의 기본 Chrome은 보안 문제로 실행되지 않아, Google에서 배포하는 Stable 버전을 직접 설치하여 사용했습니다. [cite: 79-80]
+Colab의 기본 Chrome은 보안 문제로 실행되지 않아, Google에서 배포하는 Stable 버전을 직접 설치하여 사용했습니다.
 
 ```bash
 # 일반 크롬 브라우저는 보안 문제로 오류 발생. 구글에서 직접 내려 받음
@@ -97,7 +97,7 @@ plt.rcParams.update({'font.size': 18, 'font.family': 'NanumGothic'})
 ## 3. 데이터 수집 (Data Collection)
 
 ### 3.1 봇 탐지 우회 설정 (Stealth Mode)
-[cite_start]Selenium을 이용한 자동화 탐지를 피하기 위해 다음과 같은 설정을 적용했습니다. [cite: 86-91]
+Selenium을 이용한 자동화 탐지를 피하기 위해 다음과 같은 설정을 적용했습니다.
 1.  **Headless 모드**: GUI 없이 백그라운드 실행 (리소스 절약)
 2.  **User-Agent 변경**: 봇이 아닌 일반 윈도우 10 사용자처럼 위장
 3.  **Automation Flag 제거**: 자동화 도구 사용 흔적 제거
@@ -135,7 +135,7 @@ driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
 ```
 
 ### 3.2 링크 수집 및 상세 내용 크롤링
-타겟 URL에 접속하여 스크롤을 내리며 공고 링크를 수집하고, `set`을 이용해 중복을 제거했습니다. [cite_start]이후 각 페이지에서 **제목, 회사명, 주요업무, 자격요건, 우대사항**을 추출했습니다. [cite: 93-100]
+타겟 URL에 접속하여 스크롤을 내리며 공고 링크를 수집하고, `set`을 이용해 중복을 제거했습니다. 이후 각 페이지에서 **제목, 회사명, 주요업무, 자격요건, 우대사항**을 추출했습니다.
 
 ```python
 # 링크 수집
@@ -207,7 +207,7 @@ df.to_csv("wanted_job_data.csv", encoding="utf-8-sig", index=False)
 
 ## 4. 데이터 전처리 및 분석 (Data Processing)
 
-[cite_start]수집된 텍스트 데이터를 **기술 스택(Tech Stack)**과 **역량(Soft/Hard Skills)**으로 분류하여 분석했습니다. [cite: 107-113]
+수집된 텍스트 데이터를 **기술 스택(Tech Stack)**과 **역량(Soft/Hard Skills)**으로 분류하여 분석했습니다.
 
 ### 4.1 기술 스택 추출 (with GLiNER)
 트렌드가 빠르게 변하는 기술 스택은 사전 학습된 AI 모델인 **GLiNER**를 사용하여 문맥 내에서 엔티티를 추출했습니다.
@@ -269,7 +269,7 @@ df[['Soft_Skills', 'Hard_Skills']] = df['full_text'].progress_apply(lambda x: pd
 
 ## 5. 데이터 시각화 (Visualization)
 
-추출된 데이터의 빈도수를 분석하고 **막대 그래프**와 **워드 클라우드**로 시각화했습니다. [cite_start]정확한 분석을 위해 `KoNLPy`를 이용한 명사 추출과 불용어 처리를 수행했습니다. [cite: 120-134]
+추출된 데이터의 빈도수를 분석하고 **막대 그래프**와 **워드 클라우드**로 시각화했습니다. 정확한 분석을 위해 `KoNLPy`를 이용한 명사 추출과 불용어 처리를 수행했습니다. 
 
 ### 5.1 시각화 코드
 ```python
@@ -314,8 +314,8 @@ def visualize_top_skills(keywords, title, text, color_palette='viridis'):
 ```
 
 ### 5.2 분석 결과
-* **기술 스택**: **Python**이 가장 많았으며, AI 트렌드에 따라 **PyTorch, TensorFlow**가 상위권에 위치했습니다. [cite_start]웹 개발에서는 **React, Java, Node.js**가, 인프라에서는 **AWS, Docker, Git**이 필수적이었습니다. [cite: 138-142]
-* [cite_start]**태도(Soft Skills)**: '협업', '커뮤니케이션', '소통'이 가장 중요하게 나타났으며, '주도적', '적극적' 성향을 선호하는 것으로 분석되었습니다. [cite: 144-146]
+* **기술 스택**: **Python**이 가장 많았으며, AI 트렌드에 따라 **PyTorch, TensorFlow**가 상위권에 위치했습니다. [cite_start]웹 개발에서는 **React, Java, Node.js**가, 인프라에서는 **AWS, Docker, Git**이 필수적이었습니다.
+* **태도(Soft Skills)**: '협업', '커뮤니케이션', '소통'이 가장 중요하게 나타났으며, '주도적', '적극적' 성향을 선호하는 것으로 분석되었습니다.
 
 ![기술 스택 워드 클라우드](images/tech_stack_wordcloud.png)
 ![태도 및 자세 워드 클라우드](images/soft_skill_wordcloud.png)
@@ -324,4 +324,4 @@ def visualize_top_skills(keywords, title, text, color_palette='viridis'):
 
 ## 6. 결론 (Conclusion)
 
-본 프로젝트를 통해 IT 채용 시장에서 **Python과 AI 기술의 중요성**을 데이터로 확인했습니다. [cite_start]취업을 위해서는 단순히 코딩 실력뿐만 아니라 **AWS/Docker/Git을 활용한 개발 환경 구축 능력**, 그리고 팀원과 원활하게 **소통하고 협업하는 태도**를 갖추는 것이 핵심임을 알 수 있었습니다. [cite: 151-156]
+본 프로젝트를 통해 IT 채용 시장에서 **Python과 AI 기술의 중요성**을 데이터로 확인했습니다. 취업을 위해서는 단순히 코딩 실력뿐만 아니라 **AWS/Docker/Git을 활용한 개발 환경 구축 능력**, 그리고 팀원과 원활하게 **소통하고 협업하는 태도**를 갖추는 것이 핵심임을 알 수 있었습니다.
